@@ -60,7 +60,7 @@ def readSwitch( rowNum, colNum ):
     lightSetup()        # Resume output to LED mode
     return result
     
-# Seoonds is the time to display the frame, pattern
+# Seconds is the time to display the frame, pattern
 # is an array of ints describing the bit patterns for the LED rows
 def showFrame(seconds, pattern):
     for i in range( int( seconds / (numLEDrows * rowDelay)) ):
