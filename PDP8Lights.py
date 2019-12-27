@@ -67,7 +67,7 @@ def showFrame(seconds, pattern):
         for ledrow in range(0, numLEDrows):
             # To turn on an LED i,j, send the led[i] line
             # high, and the col[j] line low
-            wordlen = numLEDsInRow[ledrow - 1]
+            wordlen = numLEDsInRow[ledrow]
             GPIO.output( led[ledrow+1], 1 )
             bits = pattern[ledrow]
             GPIO.output( col[1:wordlen+1], [1-((bits & (1<<i))>>i) for i in range(wordlen-1, -1, -1)] )
