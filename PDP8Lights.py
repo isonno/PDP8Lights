@@ -14,7 +14,7 @@
 
 import RPi.GPIO as GPIO         # sudo apt-get install python3-dev
 from time import sleep
-import sys
+import sys, gc
 
 GPIO.setmode(GPIO.BOARD)
 
@@ -92,6 +92,7 @@ def showDisplay():
     patterns = [0b111100001111, 0b111100001111, 0b111111000000, 0b111000111000,
                 0b111111000000, 0b100000001000, 0b1000010001, 0b1110000]
     elapsedTime = 0;
+    GCtime = 0;
 
     while True:
         showFrame( frameDelay, patterns )
@@ -104,11 +105,18 @@ def showDisplay():
 
         # Every 2 seconds, check for the stop switch pushed down
         if (elapsedTime > 2):
+            GCtime += elapsedTime
             elapsedTime = 0
             stopSwitch = readSwitch( 3, 6 ) # Momemtary Stop switch, 3rd from right
             if stopSwitch == 0:
                 GPIO.cleanup()
                 sys.exit(0)
+
+            # Run a garbage collection occasionally,
+            # to keep the data/CPU usage down
+            if GCtime > (30 * 60):
+                GCtime = 0
+                gc.collect()
     
 showDisplay()
 
