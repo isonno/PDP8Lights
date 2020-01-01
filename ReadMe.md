@@ -17,9 +17,12 @@ The package is written in Python 3 (Python 2 becomes [obsolete](https://pythoncl
 ```
 sudo apt-get install python3-dev
 ```
+
+For some reason, the script leaks resouces and starts slowing down after running for several hours. This gets to the point where the display starts to noticeably flicker. In order avoid this, it exits after about half an hour. Another script, `RunLights.py` restarts `PDP8Lights.py` it with a new heap to avoid the slowdown.
+
 Since the `GPIO` library accesses privledged system resources, you'll need to run the script as root:
 ```
-sudo python3 PDP8Lights.py
+sudo python3 RunLights.py
 ```
 Holding down the Stop switch (third from the right) for a few seconds cleanly exits the script.
 
