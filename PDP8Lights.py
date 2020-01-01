@@ -73,7 +73,6 @@ def showFrame(seconds, pattern):
             bitList = [1-((bits & (1<<i))>>i) for i in range(wordlen-1, -1, -1)]
             GPIO.output( col[1:wordlen+1], bitList )
             sleep(rowDelay)
-            del bitList
             GPIO.output( col[1:wordlen+1], 1 )
             GPIO.output( led[ledrow+1], 0 )
 
