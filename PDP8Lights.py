@@ -35,6 +35,7 @@ numLEDrows = len(numLEDsInRow)
 # Timing (in seconds)
 rowDelay = 0.0005               # Time to display lights in each row
 frameDelay = 0.05               # Time per animation frame
+scriptRestartTime = 30 * 60     # Runtime before the script gets restarted
 
 totalFrameTime = rowDelay * numLEDrows + frameDelay
 
@@ -69,8 +70,10 @@ def showFrame(seconds, pattern):
             wordlen = numLEDsInRow[ledrow]
             GPIO.output( led[ledrow+1], 1 )
             bits = pattern[ledrow]
-            GPIO.output( col[1:wordlen+1], [1-((bits & (1<<i))>>i) for i in range(wordlen-1, -1, -1)] )
+            bitList = [1-((bits & (1<<i))>>i) for i in range(wordlen-1, -1, -1)]
+            GPIO.output( col[1:wordlen+1], bitList )
             sleep(rowDelay)
+            del bitList
             GPIO.output( col[1:wordlen+1], 1 )
             GPIO.output( led[ledrow+1], 0 )
 
@@ -88,11 +91,16 @@ def rightRotate1(n, numBits):
 # each of the LED rows.
 def showDisplay():
     lightSetup()
+
     patterns = [0b111100001111, 0b111100001111, 0b111111000000, 0b111000111000,
                 0b111111000000, 0b100000001000, 0b1000010001, 0b1110000]
     elapsedTime = 0;
+    totalTime = 0
 
-    while True:
+    # Exit the outerloop every scriptRestartTime, so RunLights.py
+    # can restart it. Otherwise, some creeping leak bloats
+    # and slows the app to the point where the display flickers
+    while totalTime < scriptRestartTime:
         showFrame( frameDelay, patterns )
         for i in range(len(patterns)):
             if (i % 2) == 0:
@@ -103,11 +111,14 @@ def showDisplay():
 
         # Every 2 seconds, check for the stop switch pushed down
         if (elapsedTime > 2):
+            totalTime += elapsedTime
             elapsedTime = 0
             stopSwitch = readSwitch( 3, 6 ) # Momemtary Stop switch, 3rd from right
             if stopSwitch == 0:
                 GPIO.cleanup()
                 sys.exit(0)
+
+    GPIO.cleanup()
     
 showDisplay()
 
