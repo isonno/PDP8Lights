@@ -16,9 +16,9 @@ import RPi.GPIO as GPIO         # sudo apt-get install python3-dev
 from time import sleep
 import sys
 
-# This are the RasPI board pin numbers on the 40 pin header.
+# These are the RasPI board pin numbers on the 40 pin header.
 # Now, beware of the 1-based indexing from the schematic, vs.
-# the zero based indexing Python likes. Note the PiDP-8
+# the zero based indexing Python likes. Also note the PiDP-8
 # schematic shows col 1,2 as pins 3,5 but on my unit
 # they're pins 8 and 10.
 
@@ -34,7 +34,7 @@ numLEDrows = len(numLEDsInRow)
 
 # Timing (in seconds)
 rowDelay = 0.0005               # Time to display lights in each row
-frameDelay = 0.05               # Time per animation frame
+frameDelay = 1/20.0             # Time per animation frame
 scriptRestartTime = 30 * 60     # Runtime before the script gets restarted
 
 totalFrameTime = rowDelay * numLEDrows + frameDelay
