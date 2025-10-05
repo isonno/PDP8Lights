@@ -1,15 +1,11 @@
 import RPi.GPIO as GPIO         # sudo apt-get install python3-dev
+import lgpio
 from time import sleep
 import sys
 
-# If it fails with: lgpio.error: 'GPIO busy'
-# Then this is likely because the system SPI devices is enabled. This ties
-# up GPIO ports 7 & 8 (pins 26 & 24). To disable it, use:
-#  $ sudo raspi-config
-# and navigate to "Interfacing Options" then "SPI", and disable it.
 
 
-cols = [40, 38, 36, 32, 26, 24, 22, 18, 16, 12, 19, 21, 23, 29, 31, 33, 37]
+cols = [40, 38, 36, 32, 26, 24, 22, 18, 16, 12, 19, 21, 23, 29, 31, 33, 35, 37]
 
 addrs = [7, 11, 13]
 
@@ -19,10 +15,23 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 
 def lightSetup():
-    GPIO.setup(xio, GPIO.OUT)
-    GPIO.output(xio, 0)         # Write to LEDs
-    GPIO.setup(cols, GPIO.OUT)
-    GPIO.setup(addrs, GPIO.OUT)
+    try:
+        GPIO.setup(xio, GPIO.OUT)
+        GPIO.output(xio, 0)         # Write to LEDs
+        GPIO.setup(cols, GPIO.OUT)
+        GPIO.setup(addrs, GPIO.OUT)
+        # If it fails with: lgpio.error: 'GPIO busy'
+        # Then this is likely because the system SPI devices is enabled. This ties
+        # up GPIO ports 7 & 8 (pins 26 & 24). (See the gpioinfo command)
+
+    except lgpio.error as x:
+        print("Error: " + str(x))
+        print("It looks like the system is using the GPIO ports")
+        print("Make sure PDP10 is not running (pdpcontrol stop)")
+        print("Also shut down any system devices, e.g.:")
+        print(" sudo raspi-config")
+        print(" Interface Options > SPI Interface > SPI Enable > No")
+        sys.exit(0)
 
 def somelights():
     GPIO.output(addrs, [0, 0, 0])
@@ -37,8 +46,9 @@ def somelights():
 
 def pattern():
     # Lights are inverted; 0: on, 1: off
-    GPIO.output(addrs, [0, 0, 0])
+    GPIO.output(addrs, [1, 0, 0]) # Note [LSB, m, MSB] 
     colrange = range(len(cols))
+    print(colrange)
     for bulb in colrange:
         bits = [0 if b < bulb else 1 for b in colrange]
         GPIO.output(cols, bits)
@@ -53,6 +63,7 @@ def pattern():
 lightSetup()
 
 pattern()
+
 
 
 GPIO.cleanup()
